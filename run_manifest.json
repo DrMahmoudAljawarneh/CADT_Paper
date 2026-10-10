@@ -1,0 +1,127 @@
+{
+  "seed": 42,
+  "trials": 500,
+  "hs_seconds": 43.0,
+  "N_DEV": 500,
+  "SIM_MIN": 100,
+  "TOTAL_S": 250,
+  "ATK_S": 100,
+  "ALP": 0.8,
+  "LAM": 1.5,
+  "G_HI": 0.85,
+  "G_LO": 0.4,
+  "V": 3.0,
+  "I_TX": 0.0091,
+  "I_HSPIKE": 0.045,
+  "TX_S": 25.0,
+  "SENSOR_PRECISION": 0.005,
+  "SIGMA_NOISE": 0.001,
+  "git_sha": "unknown",
+  "python": "3.14.6",
+  "sklearn": false,
+  "numpy": "2.5.0",
+  "matplotlib": "3.11.0",
+  "gateway_cost": {
+    "calibration": {
+      "calib_wall_s": 0.13415460009127855,
+      "calib_samples": 15000
+    },
+    "per_step": {
+      "per_step_ms": 0.009293949929997325,
+      "fleet_ms_per_s": 4.6469749649986625,
+      "n_twins": 500,
+      "steps": 2000
+    }
+  },
+  "ablation": {
+    "replay": {
+      "env": {
+        "det_rate": 0.0,
+        "far": 0.0
+      },
+      "ops": {
+        "det_rate": 0.0,
+        "far": 0.0
+      },
+      "phy": {
+        "det_rate": 100.0,
+        "far": 0.0
+      },
+      "full": {
+        "det_rate": 100.0,
+        "far": 0.0
+      },
+      "isoforest_full": {
+        "error": "sklearn unavailable: DLL load failed while importing _target_encoder_fast: An Application Control policy has blocked this file."
+      }
+    },
+    "masquerade": {
+      "env": {
+        "det_rate": 100.0,
+        "far": 0.0
+      },
+      "ops": {
+        "det_rate": 100.0,
+        "far": 0.0
+      },
+      "phy": {
+        "det_rate": 0.0,
+        "far": 0.0
+      },
+      "full": {
+        "det_rate": 100.0,
+        "far": 0.0
+      },
+      "isoforest_full": {
+        "error": "sklearn unavailable: DLL load failed while importing _target_encoder_fast: An Application Control policy has blocked this file."
+      }
+    },
+    "fdi": {
+      "env": {
+        "det_rate": 0.0,
+        "far": 0.0
+      },
+      "ops": {
+        "det_rate": 0.0,
+        "far": 0.0
+      },
+      "phy": {
+        "det_rate": 100.0,
+        "far": 0.0
+      },
+      "full": {
+        "det_rate": 100.0,
+        "far": 0.0
+      },
+      "isoforest_full": {
+        "error": "sklearn unavailable: DLL load failed while importing _target_encoder_fast: An Application Control policy has blocked this file."
+      }
+    }
+  },
+  "note": "ROC scores use window-minimum trust (optimistic full-window statistic); online performance = detection/FAR at fixed thresholds.",
+  "results": {
+    "replay": {
+      "det_rate": 97.6,
+      "det_ci95": 1.8972152055051645,
+      "far": 0.0,
+      "mean_resp_s": 29.307377049180328
+    },
+    "masquerade": {
+      "det_rate": 100.0,
+      "det_ci95": 0.0,
+      "far": 0.0,
+      "mean_resp_s": 2.7
+    },
+    "fdi": {
+      "det_rate": 100.0,
+      "det_ci95": 0.0,
+      "far": 0.0,
+      "mean_resp_s": 8.652
+    }
+  },
+  "files": {
+    "energy_data.csv": "df7fa5a269a56cb2f1a6000af0c2472b6e383f5b81dd7347ae523a776cf7527f",
+    "trust_data.csv": "7f87248cf1808d16b4671aecf78774e7e2543fa33cbc379f89352dc9d8c64d15",
+    "run_manifest.json": "6ada2150e28950a978364dbed12f18cc45e854682f6a7e941b0493c09b1059e8"
+  }
+}
