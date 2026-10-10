@@ -53,3 +53,23 @@ All stochastic elements derive from the `--seed` argument (default 42).
 `run_manifest.json` records the exact configuration and output hashes.
 Verified cross-seed stability: replay detection 97.6% / 96.8% / 96.8% /
 97.6% for seeds 42 / 1 / 2 / 3 (500 trials each, FAR 0.0% throughout).
+
+## Baselines
+
+`--ablate` additionally reports two dependency-free baselines on identical
+features: a Euclidean-distance variant (same thresholds and recursion) and
+a NumPy-only isolation forest (50 trees, 1% score threshold). Where
+scikit-learn installs cleanly, its `IsolationForest` runs side by side;
+otherwise the run records the skip and the NumPy figures stand.
+
+## External validation (planned)
+
+`swat_protocol.md` + `swat_validation.py` scaffold validation against SWaT
+public testbed data (pending dataset access). The script imports the
+paper's trust machinery unmodified; only the telemetry source changes.
+
+## Continuous integration
+
+`.github/workflows/sim.yml` runs a reduced verification
+(`--seed 42 --trials 50 --ablate --no-plots`, with sklearn) on every push
+and uploads the resulting CSVs and manifest as artifacts.

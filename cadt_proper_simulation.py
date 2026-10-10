@@ -193,6 +193,93 @@ def compute_baselines(devs):
     return bl, {"calib_wall_s": calib_s, "calib_samples": n_calib}, cal
 
 
+class NumpyIsolationForest:
+    """Minimal isolation forest, NumPy-only (isolation principle: anomalies
+    isolate in fewer random splits).
+
+    Score follows the standard definition s(x) = 2**(-E[h(x)] / c(psi))
+    with c(psi) = 2*H(psi-1) - 2*(psi-1)/psi. Uses the ambient np.random
+    stream, so callers control determinism. Exists because scikit-learn is
+    not installable in every environment; where sklearn is present both
+    implementations run and are reported side by side.
+    """
+
+    def __init__(self, n_trees=50, subsample=256, max_depth=None):
+        self.n_trees = n_trees
+        self.subsample = subsample
+        self.max_depth = max_depth or int(np.ceil(np.log2(subsample)))
+        hn = np.zeros(subsample + 1)
+        hn[1:] = np.cumsum(1.0 / np.arange(1, subsample + 1))
+        self._c = np.zeros(subsample + 1)
+        n = np.arange(2, subsample + 1)
+        self._c[n] = 2 * hn[n - 1] - 2 * (n - 1) / n
+        self.trees = []
+
+    def _build(self, X, idx, depth):
+        feat, thr, left, right, leaf, size = self._cur
+        node = len(feat)
+        feat.append(0)
+        thr.append(0.0)
+        left.append(-1)
+        right.append(-1)
+        leaf.append(False)
+        size.append(len(idx))
+        xs = X[idx]
+        lo, hi = xs.min(axis=0), xs.max(axis=0)
+        movable = np.where(hi > lo)[0]
+        if depth >= self.max_depth or len(idx) <= 1 or len(movable) == 0:
+            leaf[node] = True
+            return node
+        f = movable[np.random.randint(len(movable))]
+        t = float(np.random.uniform(lo[f], hi[f]))
+        l_idx = idx[xs[:, f] < t]
+        r_idx = idx[xs[:, f] >= t]
+        if len(l_idx) == 0 or len(r_idx) == 0:  # degenerate split
+            leaf[node] = True
+            return node
+        feat[node] = int(f)
+        thr[node] = t
+        left[node] = self._build(X, l_idx, depth + 1)
+        right[node] = self._build(X, r_idx, depth + 1)
+        return node
+
+    def fit(self, X):
+        X = np.asarray(X, dtype=float)
+        n = len(X)
+        self.trees = []
+        for _ in range(self.n_trees):
+            idx = np.random.choice(n, min(self.subsample, n), replace=False)
+            self._cur = ([], [], [], [], [], [])
+            self._build(X, idx, 0)
+            self.trees.append(tuple(np.asarray(a) for a in self._cur))
+        return self
+
+    def _score_tree(self, X, tree):
+        feat, thr, left, right, leaf, size = tree
+        N = len(X)
+        node = np.zeros(N, dtype=int)
+        depth = np.zeros(N)
+        active = np.ones(N, dtype=bool)
+        for _ in range(self.max_depth + 1):
+            if not active.any():
+                break
+            f = feat[node]
+            go_left = X[np.arange(N), f] < thr[node]
+            nxt = np.where(go_left, left[node], right[node])
+            depth += active & ~leaf[node]
+            node = np.where(active, nxt, node)
+            active = active & ~leaf[node]
+        adj = np.where(size[node] > 1, self._c[np.minimum(size[node],
+                                                          self.subsample)],
+                       0.0)
+        return depth + adj
+
+    def anomaly_score(self, X):
+        X = np.asarray(X, dtype=float)
+        h = np.mean([self._score_tree(X, t) for t in self.trees], axis=0)
+        return np.power(2.0, -h / self._c[self.subsample])
+
+
 def ablation_report(bl, cal, devs, seed, n_paths=100):
     """Context-group ablation + IsolationForest baseline (replay pool).
 
@@ -286,6 +373,33 @@ def ablation_report(bl, cal, devs, seed, n_paths=100):
         out[atk_name]["euclidean_full"] = {"det_rate": round(dr, 1),
                                            "far": round(far, 1)}
         print(f"  baseline[{atk_name}/euclidean]: Det {dr:.1f}%, FAR {far:.1f}%")
+
+        # Dependency-free isolation-forest baseline on identical features.
+        # Threshold = 99th percentile of training scores (matches the 1%
+        # contamination convention); decision rule mirrors the sklearn path.
+        nif = NumpyIsolationForest().fit(C_full)
+        thr_if = float(np.percentile(nif.anomaly_score(C_full), 99))
+        tp = tn_ = fp = fn = 0
+        for atk, vecs in pool:
+            pred = (nif.anomaly_score(np.asarray(vecs)) >= thr_if)
+            det = bool(pred[ATK_S:].sum() >= 5)
+            pre_fp = bool(pred[:ATK_S].sum() >= 5)
+            if atk:
+                if det and not pre_fp:
+                    tp += 1
+                else:
+                    fn += 1
+            else:
+                if pre_fp or det:
+                    fp += 1
+                else:
+                    tn_ += 1
+        dr = tp / (tp + fn) * 100 if (tp + fn) else 0
+        far = fp / (fp + tn_) * 100 if (fp + tn_) else 0
+        out[atk_name]["numpy_isoforest_full"] = {"det_rate": round(dr, 1),
+                                                 "far": round(far, 1)}
+        print(f"  baseline[{atk_name}/numpy-isoforest]: Det {dr:.1f}%, "
+              f"FAR {far:.1f}%")
 
         # Generic baseline: IsolationForest on identical full features
         try:

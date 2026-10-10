@@ -16,19 +16,20 @@
   "TX_S": 25.0,
   "SENSOR_PRECISION": 0.005,
   "SIGMA_NOISE": 0.001,
-  "git_sha": "unknown",
+  "noise_sigma": 0.001,
+  "git_sha": "22ef880",
   "python": "3.14.6",
   "sklearn": false,
   "numpy": "2.5.0",
   "matplotlib": "3.11.0",
   "gateway_cost": {
     "calibration": {
-      "calib_wall_s": 0.13415460009127855,
+      "calib_wall_s": 0.14210049994289875,
       "calib_samples": 15000
     },
     "per_step": {
-      "per_step_ms": 0.009293949929997325,
-      "fleet_ms_per_s": 4.6469749649986625,
+      "per_step_ms": 0.011228699935600162,
+      "fleet_ms_per_s": 5.614349967800081,
       "n_twins": 500,
       "steps": 2000
     }
@@ -49,6 +50,14 @@
       },
       "full": {
         "det_rate": 100.0,
+        "far": 0.0
+      },
+      "euclidean_full": {
+        "det_rate": 0.0,
+        "far": 0.0
+      },
+      "numpy_isoforest_full": {
+        "det_rate": 98.0,
         "far": 0.0
       },
       "isoforest_full": {
@@ -72,6 +81,14 @@
         "det_rate": 100.0,
         "far": 0.0
       },
+      "euclidean_full": {
+        "det_rate": 100.0,
+        "far": 0.0
+      },
+      "numpy_isoforest_full": {
+        "det_rate": 98.0,
+        "far": 2.0
+      },
       "isoforest_full": {
         "error": "sklearn unavailable: DLL load failed while importing _target_encoder_fast: An Application Control policy has blocked this file."
       }
@@ -92,6 +109,14 @@
       "full": {
         "det_rate": 100.0,
         "far": 0.0
+      },
+      "euclidean_full": {
+        "det_rate": 100.0,
+        "far": 0.0
+      },
+      "numpy_isoforest_full": {
+        "det_rate": 90.0,
+        "far": 2.0
       },
       "isoforest_full": {
         "error": "sklearn unavailable: DLL load failed while importing _target_encoder_fast: An Application Control policy has blocked this file."
@@ -122,6 +147,6 @@
   "files": {
     "energy_data.csv": "df7fa5a269a56cb2f1a6000af0c2472b6e383f5b81dd7347ae523a776cf7527f",
     "trust_data.csv": "7f87248cf1808d16b4671aecf78774e7e2543fa33cbc379f89352dc9d8c64d15",
-    "run_manifest.json": "6ada2150e28950a978364dbed12f18cc45e854682f6a7e941b0493c09b1059e8"
+    "run_manifest.json": "d24c456a5ae01eed32d3c124873f5e12f7e7f06ff2eb607493f30b7ad35749a6"
   }
 }
